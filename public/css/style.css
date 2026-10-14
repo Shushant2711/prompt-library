@@ -86,3 +86,5 @@ dialog p{margin:6px 0 4px;color:var(--mute);font-size:13px}
 .dlg-bar{display:flex;justify-content:flex-end;gap:8px;margin-top:18px}
 @media(max-width:1100px){.grid{grid-template-columns:1fr}}
 @media(max-width:800px){body{height:auto;min-height:100vh}main{grid-template-columns:1fr}aside{max-height:300px;border-right:0;border-bottom:1px solid var(--line)}#editor{padding:16px}.brand p{display:none}}
+
+.lbl small{font-weight:400;color:var(--mute);font-size:12px;margin-left:6px}

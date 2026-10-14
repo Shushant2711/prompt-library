@@ -45,7 +45,7 @@ function renderList() {
     const li = el("li", { className: t.id === current ? "on" : "" },
       el("div", { className: "row" }, el("span", { className: "t", textContent: t.title || "Untitled" }), t.tag ? el("span", { className: "pill", textContent: t.tag }) : ""),
       el("div", { className: "snip", textContent: (t.body || "Empty prompt").replace(/\s+/g, " ").slice(0, 80) }),
-      el("div", { className: "g", textContent: `${n} ${n === 1 ? "variable" : "variables"} · ${t.provider === "openai" ? "OpenAI" : "Claude"}` }));
+      el("div", { className: "g", textContent: `${n} ${n === 1 ? "variable" : "variables"} · ${LABEL[t.provider] || t.provider}` }));
     li.onclick = () => { current = t.id; lastOut = null; renderList(); renderEditor(); };
     ul.append(li);
   });
@@ -94,7 +94,7 @@ function renderEditor() {
   if (!t) {
     const b = el("button", { className: "primary", textContent: "+ New template" });
     b.onclick = () => $("#newBtn").click();
-    ed.append(el("div", { className: "empty-state" }, el("h3", { textContent: "No templates yet" }), el("p", { textContent: "Write your first prompt and test it on Claude or OpenAI." }), b));
+    ed.append(el("div", { className: "empty-state" }, el("h3", { textContent: "No templates yet" }), el("p", { textContent: "Write your first prompt and test it on Gemini, Groq, Claude or OpenAI." }), b));
     return;
   }
   const bind = (node, key, after) => { node.value = t[key] || ""; node.oninput = () => { t[key] = node.value; save(); renderList(); after && after(); }; return node; };
@@ -126,7 +126,7 @@ function renderEditor() {
   const model = el("input", { className: "field", value: t.model, placeholder: "Model name" });
   model.oninput = () => { t.model = model.value; save(); };
   const seg = el("div", { className: "seg" });
-  [["anthropic", "Claude"], ["openai", "OpenAI"]].forEach(([v, label]) => {
+  Object.entries(LABEL).forEach(([v, label]) => {
     const b = el("button", { textContent: label, className: t.provider === v ? "on" : "" });
     b.onclick = () => {
       t.provider = v; t.model = model.value = DEFAULT_MODEL[v]; save(); renderList();
@@ -142,7 +142,7 @@ function renderEditor() {
     lastOut = { loading: true }; renderOut(obox);
     const keys = read(KS, {});
     try {
-      const r = await fetch("/api/run", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ provider: t.provider, model: t.model, system: fill(t.system, t.values), prompt: fill(t.body, t.values), apiKey: t.provider === "openai" ? keys.openai : keys.anthropic }) });
+      const r = await fetch("/api/run", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ provider: t.provider, model: t.model, system: fill(t.system, t.values), prompt: fill(t.body, t.values), apiKey: keys[t.provider] }) });
       const j = await r.json();
       lastOut = r.ok ? j : { error: j.error || "Request failed" };
     } catch { lastOut = { error: "Could not reach the server. Check your connection." }; }
@@ -166,7 +166,7 @@ function renderEditor() {
 }
 
 $("#newBtn").onclick = () => {
-  const t = { id: uid(), title: "", tag: "", system: "", body: "", provider: "anthropic", model: DEFAULT_MODEL.anthropic, values: {} };
+  const t = { id: uid(), title: "", tag: "", system: "", body: "", provider: DEFAULT_PROVIDER, model: DEFAULT_MODEL[DEFAULT_PROVIDER], values: {} };
   templates.unshift(t); current = t.id; lastOut = null; save(); renderList(); renderEditor();
   $(".title").focus();
 };
@@ -185,14 +185,14 @@ $("#file").onchange = async (e) => {
   try {
     const data = JSON.parse(await e.target.files[0].text());
     if (!Array.isArray(data)) throw 0;
-    data.forEach((t) => templates.push({ provider: "anthropic", model: DEFAULT_MODEL.anthropic, values: {}, system: "", tag: "", ...t, id: uid() }));
+    data.forEach((t) => templates.push({ provider: DEFAULT_PROVIDER, model: DEFAULT_MODEL[DEFAULT_PROVIDER], values: {}, system: "", tag: "", ...t, id: uid() }));
     save(); renderList(); toast(data.length + " templates imported");
   } catch { alert("That file is not a valid template export."); }
   e.target.value = "";
 };
-$("#settingsBtn").onclick = () => { const k = read(KS, {}); $("#kA").value = k.anthropic || ""; $("#kO").value = k.openai || ""; $("#dlg").showModal(); };
+$("#settingsBtn").onclick = () => { const k = read(KS, {}); $("#kG").value = k.gemini || ""; $("#kS").value = k.groq || ""; $("#kA").value = k.anthropic || ""; $("#kO").value = k.openai || ""; $("#dlg").showModal(); };
 $("#kClose").onclick = () => $("#dlg").close();
-$("#kSave").onclick = () => { localStorage.setItem(KS, JSON.stringify({ anthropic: $("#kA").value.trim(), openai: $("#kO").value.trim() })); $("#dlg").close(); toast("Keys saved"); };
+$("#kSave").onclick = () => { localStorage.setItem(KS, JSON.stringify({ gemini: $("#kG").value.trim(), groq: $("#kS").value.trim(), anthropic: $("#kA").value.trim(), openai: $("#kO").value.trim() })); $("#dlg").close(); toast("Keys saved"); };
 document.addEventListener("keydown", (e) => { if ((e.ctrlKey || e.metaKey) && e.key === "Enter") runNow(); });
 
 save(); renderList(); renderEditor();
