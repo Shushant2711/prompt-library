@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prompt Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<script>document.documentElement.dataset.theme=localStorage.getItem("pl.theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light")</script>
+</head>
+<body>
+<header>
+  <div class="brand"><span class="logo">{{ }}</span><div><h1>Prompt Library</h1><p>Write once, test on any model</p></div></div>
+  <div class="head-actions"><button id="themeBtn" class="ghost">Theme</button><button id="settingsBtn" class="ghost">API keys</button></div>
+</header>
+<main>
+<aside>
+  <div class="side-top"><input id="q" placeholder="Search templates"><button id="newBtn" class="primary">+ New</button></div>
+  <div id="tags" class="tags"></div>
+  <ul id="list"></ul>
+  <div class="side-bot"><button id="exportBtn" class="ghost">Export</button><button id="importBtn" class="ghost">Import</button></div>
+</aside>
+<section id="editor"></section>
+</main>
+<div id="toast" role="status"></div>
+<dialog id="dlg">
+  <h3>API keys</h3>
+  <p>Keys are saved only in this browser and sent only with your own test runs.</p>
+  <label class="lbl">Gemini key <small>free: aistudio.google.com</small></label><input id="kG" class="field" type="password" placeholder="AIza...">
+  <label class="lbl">Groq key <small>free: console.groq.com</small></label><input id="kS" class="field" type="password" placeholder="gsk_...">
+  <label class="lbl">Anthropic key</label><input id="kA" class="field" type="password" placeholder="sk-ant-...">
+  <label class="lbl">OpenAI key</label><input id="kO" class="field" type="password" placeholder="sk-...">
+  <div class="dlg-bar"><button id="kClose" class="ghost">Cancel</button><button id="kSave" class="primary">Save keys</button></div>
+</dialog>
+<input id="file" type="file" accept="application/json" hidden>
+<script src="/js/storage.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>
